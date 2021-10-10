@@ -1,4 +1,4 @@
-# pypelines - hack on Python stack enabling unix-like pipeline - `|`
+# pypelines
 
 `pypelines` allows you to use `|` like in the Unix shell.
 
