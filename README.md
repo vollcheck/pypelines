@@ -8,12 +8,12 @@ Look at that (really dumb) example:
 from pypelines import pypeline
 
 def mul_two(x):
-	return x * 2
+    return x * 2
 
 
 @pypeline
 def hard_computations(x):
-	return x | mul_two
+    return x | mul_two
 
 
 print(hard_computations(210))   # => 420
