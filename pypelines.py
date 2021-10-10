@@ -9,7 +9,7 @@ REPLACEMENT = {
 }
 
 
-def pipeline(where):
+def pypeline(where):
     if isinstance(where, FunctionType):
         where.__code__ = patch_code(where.__code__)
         return where
@@ -43,7 +43,7 @@ def add_two(x):
     return x + 2
 
 
-@pipeline
+@pypeline
 def test_desired(x):
     return x | add_two
 
