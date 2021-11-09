@@ -1,70 +1,35 @@
-from pprint import pprint
 from types import FunctionType
 
-from bytecode import Bytecode, Instr, SetLineno
-
-
-REPLACEMENT = {
-    'BINARY_OR': 'CALL_FUNCTION'
-}
+from bytecode import Bytecode, Instr
 
 
 def pypeline(where):
-    if isinstance(where, FunctionType):
-        where.__code__ = patch_code(where.__code__)
-        return where
+    assert isinstance(where, FunctionType), "Pypelines works best on the functions ;)"
+    where.__code__ = patch_code(where.__code__)
+    return where
 
 
 def patch_code(code):
-    bytecode = Bytecode.from_code(code)
+    # Interestingly enough, code is evaluated immediately
+    # in the decorator, just like a macro :P
 
-    # set line other way
+    bytecode = Bytecode.from_code(code)
     new_bytecode = []
 
-    # ROT_TWO simulation
-    new_bytecode.append(bytecode.pop(0))
-    new_bytecode.insert(0, bytecode.pop(0))
-
     for instr in bytecode:
-        if instr.name in REPLACEMENT:
-            new_bytecode.append(Instr(REPLACEMENT.get(instr.name), 1, lineno=instr.lineno))
+        if isinstance(instr, Instr) and instr.name == "BINARY_OR":
+            new_instrs = [
+                Instr("ROT_TWO", lineno=instr.lineno),
+                Instr("CALL_FUNCTION", 1, lineno=instr.lineno),
+            ]
+            new_bytecode += new_instrs
+
+            # Prettier but slower way:
+            # new_bytecode.append(Instr("ROT_TWO", lineno=instr.lineno))
+            # new_bytecode.append(Instr("CALL_FUNCTION", 1, lineno=instr.lineno))
         else:
             new_bytecode.append(instr)
 
     bytecode.clear()
     bytecode.extend(new_bytecode)
-
-    pprint(bytecode)
-
     return bytecode.to_code()
-
-
-def add_two(x):
-    return x + 2
-
-
-@pypeline
-def test_desired(x):
-    return x | add_two
-
-
-# @pipeline
-def test_current(x):
-    return add_two(x)
-
-
-print(test_desired(5))
-
-# [<LOAD_FAST arg='x' lineno=25>,
-#  <LOAD_GLOBAL arg='add_two' lineno=25>,
-#  <BINARY_OR lineno=25>,
-#  <RETURN_VALUE lineno=25>]
-
-# [<LOAD_GLOBAL arg='add_two' lineno=30>,
-#  <LOAD_FAST arg='x' lineno=30>,
-#  <CALL_FUNCTION arg=1 lineno=30>,
-#  <RETURN_VALUE lineno=30>]
-
-# Needed steps:
-# 1. ROT_TWO - we need to rotate top two elements on stack
-# 2. replace BINARY_OR with CALL_FUNCTION
