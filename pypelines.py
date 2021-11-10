@@ -1,21 +1,24 @@
 from pprint import pprint
 from types import FunctionType
+from typing import Callable, TypeVar
 
 from bytecode import Bytecode, Instr
 
+T = TypeVar("T")
 
-def pypeline(debug: bool = False):
-    def wrapper(where):
+
+def pypeline(debug: bool = False) -> Callable:
+    def wrapper(where: Callable[..., T]) -> Callable[..., T]:
         assert isinstance(
             where, FunctionType
-        ), "Pypelines works best on the functions ;)"
+        ), "Pypelines works best with the functions ;)"
         where.__code__ = patch_code(where.__code__, debug)
         return where
 
     return wrapper
 
 
-def patch_code(code, debug: bool = False):
+def patch_code(code: T, debug: bool = False) -> Bytecode:
     # Interestingly enough, code is evaluated immediately
     # in the decorator, just like a macro :P
 

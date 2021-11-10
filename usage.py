@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Union
+from typing import Union, List
 
 from pypelines import pypeline
 
@@ -28,7 +28,7 @@ def magic_equation(x: int) -> bool:
 
 
 @pypeline()
-def even_more_interesting_computations(x: int) -> list:
+def even_more_interesting_computations(x: int) -> List[int]:
     return x | range | partial(map, lambda x: x * x) | list
 
 
@@ -45,5 +45,5 @@ def fizz_detector(x: int) -> Union[str, int]:
 
 
 @pypeline()
-def fizzbuzz(x):
+def fizzbuzz(x: int) -> List[Union[str, int]]:
     return x | partial(range, 1) | partial(map, fizz_detector) | list
